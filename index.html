@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ChatExample</title>
+	<script
+  		src="https://code.jquery.com/jquery-3.3.1.js"
+ 		integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+	<style type="text/css">
+		#chat-box{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="login-box">
+		<input type="text" placeholder="nickname" id="nickname" />
+		<button id="login-btn">Login</button> <br>	
+	</div>
+	<div id="chat-box">
+		<input type="text" placeholder="message" id="message" />
+		<button id="send-message">Wyslij</button> <br>
+		<div id="messages"></div>		
+	</div>
+
+	<script>
+		var io = io("http://localhost:3001");
+
+		$('#login-btn').click(function()
+		{
+			if($('#nickname').val().length >= 3)
+				io.emit('login-req', $('#nickname').val());
+			else
+				alert("Nie podales nicku / jest za krotki! Minimum 3 znaki.");
+		});
+
+		io.on('logged', function(data)
+		{
+			if(data)
+			{
+				setupUserHandlers();
+
+				$('#login-box').css('display', 'none');
+				$('#chat-box').css('display', 'inline-block');
+			}
+		});
+
+		function setupUserHandlers()
+		{
+			io.on('message', function(data)
+			{
+				$('#messages').append($('<li>').text(data));
+			});
+
+			$('#send-message').click(function()
+			{
+				if($('#message').val().length >= 1)
+					io.emit('message', $('#message').val());
+				else
+					alert("Nie wpisales wiadomosci!");
+			});
+		}
+
+	</script>
+</body>
+</html>
